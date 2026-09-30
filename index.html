@@ -1,17 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pi to PKR Pakistan</title>
+  <meta charset="utf-8">
+  <title>Pi to PKR Pakistan</title>
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 40px; background: #f5f5f5; }
+    .card { background: white; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; }
+    button { background: #7c3aed; color: white; padding: 15px 25px; border: none; border-radius: 10px; font-size: 18px; margin: 10px; width: 100%; }
+  </style>
 </head>
-<body style="margin:0;background:#0f0b1e;color:white;font-family:Arial;text-align:center;padding:80px 20px">
-<h1 style="color:#f0b90b;font-size:32px">Pi to PKR Pakistan</h1>
-<p style="font-size:18px">P2P Exchange - Live</p>
-<div style="margin:30px auto;background:#1a1433;padding:20px;border-radius:12px;max-width:400px">
-<p>Validation Key:</p>
-<b>819775adfcc21a0126f38c6c49</b>
-</div>
-<p>Domain verified for Pi Network</p>
+<body>
+  <div class="card">
+    <h2>Pi to PKR - Pakistan</h2>
+    <p id="user">Login karo...</p>
+    <button onclick="login()">Login with Pi</button>
+    <button onclick="showRewardedAd()" style="background:#10b981">💰 Ad Dekho - Pi Kamao (0.005 Pi)</button>
+    <p>1 Pi = 950 PKR</p>
+    <p id="status"></p>
+  </div>
+
+<script>
+  // 1. Init Pi
+  Pi.init({ version: "2.0", sandbox: false });
+
+  let user = null;
+
+  async function login() {
+    try {
+      const scopes = ['username', 'payments'];
+      const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+      user = auth.user;
+      document.getElementById('user').innerText = "Welcome: " + user.username;
+      document.getElementById('status').innerText = "Login ho gaya! Ab Ad dekho";
+    } catch(e) {
+      alert("Pi Browser me kholo bhai!");
+    }
+  }
+
+  async function showRewardedAd() {
+    if(!user) { alert("Pehle Login karo"); return; }
+    try {
+      document.getElementById('status').innerText = "Ad load ho raha hai...";
+      
+      const isReady = await Pi.Ads.isAdReady("rewarded");
+      if(!isReady.ready) {
+        await Pi.Ads.requestAd("rewarded");
+      }
+      
+      const res = await Pi.Ads.showAd("rewarded");
+      if(res.result === "AD_REWARDED") {
+        document.getElementById('status').innerText = "Mubarak ho! 0.005 Pi mil gaya! ID: " + res.adId;
+        // Yahan aapka Pi Dashboard me Pi jayega
+      } else {
+        document.getElementById('status').innerText = "Ad close ho gaya: " + res.result;
+      }
+    } catch(err) {
+      document.getElementById('status').innerText = "Ad error: " + err.message;
+    }
+  }
+
+  function onIncompletePaymentFound(payment) { console.log(payment); }
+</script>
 </body>
 </html>
